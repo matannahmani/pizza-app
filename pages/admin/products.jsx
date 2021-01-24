@@ -55,6 +55,7 @@ const Products = (props) => {
     const [data,setData] = useState([]);
     const [upload,setLoading] = useState(false);
     const [isupdating,setUpdate] = useState(false);
+    const [newpizza,setNew] = useState(false);
     const [dataimage,setImage] = useState(undefined);
     const handler = (e,actions) => {
         setPizza({...e.rowValue,remove: actions.remove,update: actions.update});
@@ -63,6 +64,7 @@ const Products = (props) => {
     const closeHandler = (event) => {
         setState(false)
         setUpdate(false);
+        setNew(false);
     }
     const removeHandler = async () => {
         if (confirm(`are you sure you want to delete ${pizza.name}`)){
@@ -83,6 +85,7 @@ const Products = (props) => {
     const addPizzaHandler = () => {
         setPizza({name: '', price: '',jprice: '', photo: '',size: [],status: true,description: '',enabled,operation,shortdes})
         setUpdate(true);
+        setNew(true);
         setState(true);
     }
     const postPizza = async (updatepizza) => { // post / patch
@@ -93,7 +96,7 @@ const Products = (props) => {
                 const newcp = {...pizza,description: pzdesc.current.value, name: pzcode.current.value,photo: previewImage.src, price: pzprice.current.value, jprice: pzjprice.current.value};
                 setLoading(true);
                 let result;
-                if (updatepizza)
+                if (updatepizza && !newpizza)
                 {
                     result = await apipatchProduct((({ operation, enabled,shortdes,key,photo_url,photo,product, ...o }) => o)({...newcp,photodata: dataimage}) );
                 }
@@ -101,8 +104,8 @@ const Products = (props) => {
                 {
                     result = await apipostProduct((({ operation, enabled,shortdes,key,photo,id,product, ...o }) => o)({...newcp,photodata: dataimage}) );
                 }
-                if (result.code === 200){
-                    if (!updatepizza)
+                if (result.status === 200){
+                    if (newpizza)
                     {
                         newcp.id = result.data.id;
                         delete newcp.data;
